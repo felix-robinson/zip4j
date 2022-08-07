@@ -22,6 +22,23 @@ import static net.lingala.zip4j.util.B2Utils.*;
 public class B2RemoteRandomAccessFile implements Closeable {
     protected PrintWriter writer = new PrintWriter(System.err, true);
 
+    protected B2StorageClient remoteClient = null;
+    protected B2StorageClient getRemoteClient() throws IOException {
+        if (remoteClient == null) {
+            B2StorageClient client = null;
+            try {
+                // throws RunTimeException when remoteClient can't be created
+                client = B2StorageClientFactory
+                        .createDefaultFactory()
+                        .create(APPLICATION_KEY_ID, APPLICATION_KEY, USER_AGENT);
+            } catch (Exception e) {
+                throw new IOException("Failed to create B2StorageClient", e);
+            }
+            remoteClient = client;
+        }
+
+        return remoteClient;
+    }
     protected B2File b2File;
     protected final String b2FileId;
 
@@ -298,15 +315,7 @@ public class B2RemoteRandomAccessFile implements Closeable {
                 + NumberFormat.getInstance().format(range.getNumberOfBytes()) + "]");
 
         // initialise a remote connection
-        B2StorageClient remoteClient = null;
-        try {
-            // throws RunTimeException when remoteClient can't be created
-            remoteClient = B2StorageClientFactory
-                    .createDefaultFactory()
-                    .create(APPLICATION_KEY_ID, APPLICATION_KEY, USER_AGENT);
-        } catch (Exception e) {
-            throw new IOException("Failed to create B2StorageClient", e);
-        }
+        B2StorageClient b2Client = getRemoteClient();
 
         // read the remote data into memory
         B2DownloadByIdRequest request = B2DownloadByIdRequest
@@ -315,7 +324,7 @@ public class B2RemoteRandomAccessFile implements Closeable {
                 .build();
         B2ContentMemoryWriter sink = B2ContentMemoryWriter.build();
         try {
-            remoteClient.downloadById(request, sink);
+            b2Client.downloadById(request, sink);
         } catch (B2Exception b2e) {
             throw new IOException("Failed to read remote file data", b2e);
         }
@@ -350,5 +359,9 @@ public class B2RemoteRandomAccessFile implements Closeable {
 
     @Override
     public void close() throws IOException {
+        if (remoteClient != null) {
+            remoteClient.close();
+            remoteClient = null;
+        }
     }
 }

@@ -92,16 +92,16 @@ public class B2HeaderReaderTest extends AbstractIT {
 //            );
 //        }
 
-//        fileHeaders.stream()
-//                .filter(header -> header.getFileName().contains(".photoslibrary"))
-//                .forEach(header -> writer.println("name: " + header.getFileName()
-//                    + (header.isEncrypted() ? " encrypted" : " cleartext")
-//                    + (header.isDirectory() ? " directory" : " file")
-//                    + " last modified: " + (new Timestamp(header.getLastModifiedTime()))
-//                    + " compressed size: " + NumberFormat.getInstance().format(header.getCompressedSize()) + " bytes"
-//                    + " uncompressed size: " + NumberFormat.getInstance().format(header.getUncompressedSize()) + " bytes"
-//                    )
-//                );
+        fileHeaders.stream()
+                .filter(header -> header.getFileName().contains("Users/bella/Music"))
+                .forEach(header -> writer.println("name: " + header.getFileName()
+                    + (header.isEncrypted() ? " encrypted" : " cleartext")
+                    + (header.isDirectory() ? " directory" : " file")
+                    + " last modified: " + (new Timestamp(header.getLastModifiedTime()))
+                    + " compressed size: " + NumberFormat.getInstance().format(header.getCompressedSize()) + " bytes"
+                    + " uncompressed size: " + NumberFormat.getInstance().format(header.getUncompressedSize()) + " bytes"
+                    )
+                );
     }
 
 }

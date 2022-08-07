@@ -24,6 +24,23 @@ public class B2File extends File {
     private B2FileVersion b2File;
     public B2FileVersion getB2FileVersion() { return b2File; }
 
+    protected B2StorageClient remoteClient = null;
+    protected B2StorageClient getRemoteClient() throws IOException {
+        if (remoteClient == null) {
+            B2StorageClient client = null;
+            try {
+                // throws RunTimeException when remoteClient can't be created
+                client = B2StorageClientFactory
+                        .createDefaultFactory()
+                        .create(APPLICATION_KEY_ID, APPLICATION_KEY, USER_AGENT);
+            } catch (Exception e) {
+                throw new IOException("Failed to create B2StorageClient", e);
+            }
+            remoteClient = client;
+        }
+
+        return remoteClient;
+    }
 
     public B2File(B2Bucket bucket, String filename) throws FileNotFoundException, IOException {
         super(bucket.getBucketName(), filename);
@@ -51,21 +68,13 @@ public class B2File extends File {
     }
 
     protected B2FileVersion b2fileVersionFromFileName(String filename) throws FileNotFoundException, IOException {
-        B2StorageClient remoteClient = null;
-        try {
-            // throws RunTimeException when remoteClient can't be created
-            remoteClient = B2StorageClientFactory
-                    .createDefaultFactory()
-                    .create(APPLICATION_KEY_ID, APPLICATION_KEY, USER_AGENT);
-        } catch (Exception e) {
-            throw new ProviderException("Failed to create B2StorageClient", e);
-        }
-        assert(remoteClient != null);
+        B2StorageClient b2Client = getRemoteClient();
+        assert(b2Client != null);
 
         List<B2Bucket> remoteBuckets = null;
         try {
             // throws B2Exception
-            remoteBuckets = remoteClient.buckets();
+            remoteBuckets = b2Client.buckets();
         } catch (B2Exception b2e) {
             throw new IOException("Failed to retrieve B2 bucket list", b2e);
         }
@@ -83,7 +92,7 @@ public class B2File extends File {
         B2ListFilesIterable remoteFiles = null;
         try {
             // throws B2Exception
-            remoteFiles = remoteClient.fileNames(b2Bucket.getBucketId());
+            remoteFiles = b2Client.fileNames(b2Bucket.getBucketId());
         } catch (B2Exception b2e) {
             throw new IOException("Failed to retrieve B2 file list", b2e);
         }
@@ -174,21 +183,14 @@ public class B2File extends File {
      */
     @Override
     public boolean exists() {
-        B2StorageClient remoteClient = null;
-        try {
-            // throws RunTimeException when remoteClient can't be created
-            remoteClient = B2StorageClientFactory
-                    .createDefaultFactory()
-                    .create(APPLICATION_KEY_ID, APPLICATION_KEY, USER_AGENT);
-        } catch (Exception e) {
-            throw new ProviderException("Failed to create B2StorageClient", e);
-        }
-        assert(remoteClient != null);
+        B2StorageClient b2Client = null;
+        try { b2Client = getRemoteClient(); } catch (IOException ioe) { return false; }
+        assert(b2Client != null);
 
         List<B2Bucket> remoteBuckets = null;
         try {
             // throws B2Exception
-            remoteBuckets = remoteClient.buckets();
+            remoteBuckets = b2Client.buckets();
         } catch (B2Exception b2e) {
             throw new UncheckedIOException(new IOException("Failed to retrieve B2 bucket list", b2e));
         }
@@ -206,7 +208,7 @@ public class B2File extends File {
         B2ListFilesIterable remoteFiles = null;
         try {
             // throws B2Exception
-            remoteFiles = remoteClient.fileNames(b2Bucket.getBucketId());
+            remoteFiles = b2Client.fileNames(b2Bucket.getBucketId());
         } catch (B2Exception b2e) {
             throw new UncheckedIOException(new IOException("Failed to retrieve B2 file list", b2e));
         }

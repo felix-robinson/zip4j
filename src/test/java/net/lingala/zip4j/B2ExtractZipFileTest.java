@@ -55,8 +55,9 @@ public class B2ExtractZipFileTest extends AbstractIT {
 
         ZipFile zipFile = new ZipFile(b2File);
         assertThat(zipFile).isNotNull();
-        String pathToExtract = "Macintosh HD/Users/bella/Pictures/Photos Library.photoslibrary/";
-        String destinationPath = "/Users/bluepill/Temp/";
+//        String pathToExtract = "Macintosh HD/Users/bella/Pictures/Photos Library.photoslibrary/"; // Bella's photo library
+        String pathToExtract = "Macintosh HD/Users/bella/Music/"; // Bella's Music
+        String destinationPath = "/Volumes/Users 2TB/temp/RecoveredBellasMusic";
         zipFile.extractFile(pathToExtract, destinationPath);
 
 //        List<FileHeader> headers = zipFile.getFileHeaders();
@@ -91,6 +92,6 @@ public class B2ExtractZipFileTest extends AbstractIT {
 //        writer.println("\ttotal succeeded = " + NumberFormat.getInstance().format(succeededExistenceCheckHeaders.size()));
 //        writer.println("\ttotal failed = " + NumberFormat.getInstance().format(failedExistenceCheckHeaders.size()));
 //        writer.println("\ttotal exceptioned = " + NumberFormat.getInstance().format(exceptionedHeaders.size()));
-;    }
+    }
 
 }
