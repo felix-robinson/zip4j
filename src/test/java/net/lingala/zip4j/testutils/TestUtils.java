@@ -6,19 +6,14 @@ import net.lingala.zip4j.util.FileUtils;
 import net.lingala.zip4j.util.InternalZipConstants;
 import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.List;
 import java.util.Random;
 
@@ -26,6 +21,13 @@ public class TestUtils {
 
   private static final String TEST_FILES_FOLDER_NAME = "test-files";
   private static final String TEST_ARCHIVES_FOLDER_NAME = "test-archives";
+
+  public final static String NULL = "null";
+  /** A table of hex digits */
+  private static final char[] hexDigit = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D',
+          'E', 'F' };
+  private static BitSet printChars = null;
+  private static final String PRINTABLE = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
 
   public static File getTestFileFromResources(String fileName) {
     return getFileFromResources(TEST_FILES_FOLDER_NAME, fileName);
@@ -192,4 +194,104 @@ public class TestUtils {
       throw new RuntimeException(e);
     }
   }
+
+  /**
+   * Initialize bitset for isPrintable()
+   */
+  private static synchronized void initPrintChars() {
+    if (printChars == null) {
+      printChars = new BitSet(128);
+      for (int i = 0; i < PRINTABLE.length(); i++) {
+        printChars.set(PRINTABLE.charAt(i));
+      }
+    }
+  }
+
+  /**
+   * Returns <code>true</code> if characters may be considered "printable"
+   */
+  public static boolean isPrintable(char ch) {
+    if (!Character.isISOControl(ch)) {
+      if (printChars == null)
+        initPrintChars();
+      return printChars.get(ch);
+    }
+    return false;
+  }
+
+  /**
+   * Converts a nibble to a hex character
+   * @param   nibble   the nibble to convert.
+   * @return the hex character
+   */
+  private static char toHex(int nibble) {
+    return hexDigit[(nibble & 0xF)];
+  }
+
+  /**
+   * Dumps binary data, presenting raw bytes and their character equivalents.
+   * The output looks like this:
+   * <pre>
+   * 00000000  01 04 04 00 7F E7 55 03 6F 76 65 72 76 69 65 77  ......U.overview
+   * 00000010  00 36 03 4F 76 65 72 76 69 65 77 00 01 60 64 03  .6.Overview..`d.
+   * 00000020  57 68 61 74 20 69 73 20 57 41 50 3F 00 01 26 26  What is WAP?..&&
+   * </pre>
+   *
+   * @param start start "offset" (the left column)
+   * @param w consumes the output
+   * @param data the data to be displayed
+   * @param off the start offset in the data array
+   * @param len number of bytes to dump.
+   */
+  public static void hexDump(int start, PrintWriter w, byte[] data, int off, int len) {
+    if (data != null || len != 0) {
+      int rowSize = 16; // Number of bytes to show in a row
+      int addrBits = (((off + len) < 0x10000) ? 16 : ((off + len) < 0x1000000 ? 24 : 32));
+
+      int nRows = (len + rowSize - 1) / rowSize;
+      for (int row = 0; row < nRows; row++) {
+
+        // Create row address label:
+        int addr = start + row * rowSize;
+        for (int i = addrBits - 4; i >= 0; i -= 4)
+          w.print(toHex(addr >> i));
+        w.print(" ");
+
+        // Show the bytes plus their renderable characters:
+        for (int offset = 0; offset < rowSize; offset++) {
+          int index = (row * rowSize) + offset;
+          if (index < len) {
+            // Separate bytes by a single space
+            w.print(" ");
+            int b = data[off + index];
+            w.print(toHex(b >> 4)); // upper nibble
+            w.print(toHex(b)); // lower nibblebble
+          } else {
+            // Pad partial line with spaces
+            // so that the character version will align correctly:
+            w.print("   ");
+          }
+        }
+        // Add character version of row data:
+        w.print("  ");
+        for (int offset = 0; offset < rowSize; offset++) {
+          int index = (row * rowSize) + offset;
+          if (index < data.length) {
+            char ch = (char) data[off + index];
+            if (isPrintable(ch)) {
+              w.print(ch); // displayable character
+            } else {
+              w.print('.');
+            }
+          } else {
+            // Pad partial line with spaces
+            // so that all lines have equal length
+            w.print(' ');
+          }
+        }
+        w.println();
+      }
+    }
+  }
+
 }

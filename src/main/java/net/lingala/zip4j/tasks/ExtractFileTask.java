@@ -16,6 +16,8 @@ import net.lingala.zip4j.util.UnzipUtil;
 import net.lingala.zip4j.util.Zip4jUtil;
 
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,13 +40,16 @@ public class ExtractFileTask extends AbstractExtractFileTask<ExtractFileTaskPara
   protected void executeTask(ExtractFileTaskParameters taskParameters, ProgressMonitor progressMonitor)
       throws IOException {
 
+    PrintWriter writer = new PrintWriter(System.err, true);  // TODO remove this line
     List<FileHeader> fileHeadersUnderDirectory = getFileHeadersToExtract(taskParameters.fileToExtract);
     try(ZipInputStream zipInputStream = createZipInputStream(taskParameters.zip4jConfig)) {
       byte[] readBuff = new byte[taskParameters.zip4jConfig.getBufferSize()];
       for (FileHeader fileHeader : fileHeadersUnderDirectory) {
+        writer.print(" [" + NumberFormat.getInstance().format(fileHeader.getUncompressedSize()) + "] " + fileHeader.getFileName() ); // TODO remove this line
         splitInputStream.prepareExtractionForFileHeader(fileHeader);
         String newFileName = determineNewFileName(taskParameters.newFileName, taskParameters.fileToExtract, fileHeader);
         extractFile(zipInputStream, fileHeader, taskParameters.outputPath, newFileName, progressMonitor, readBuff);
+        writer.println(" extracted to " + taskParameters.outputPath); // TODO remove this line
       }
     } finally {
       if (splitInputStream != null) {

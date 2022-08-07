@@ -1,10 +1,7 @@
 package net.lingala.zip4j.util;
 
 import net.lingala.zip4j.exception.ZipException;
-import net.lingala.zip4j.io.inputstream.NumberedSplitFileInputStream;
-import net.lingala.zip4j.io.inputstream.SplitFileInputStream;
-import net.lingala.zip4j.io.inputstream.ZipInputStream;
-import net.lingala.zip4j.io.inputstream.ZipStandardSplitFileInputStream;
+import net.lingala.zip4j.io.inputstream.*;
 import net.lingala.zip4j.model.FileHeader;
 import net.lingala.zip4j.model.ZipModel;
 
@@ -56,6 +53,11 @@ public class UnzipUtil {
 
     if (zipFile.getName().endsWith(InternalZipConstants.SEVEN_ZIP_SPLIT_FILE_EXTENSION_PATTERN)) {
       return new NumberedSplitFileInputStream(zipModel.getZipFile());
+    }
+
+    if (zipFile instanceof B2File) {
+      return new B2ZipStandardSplitFileInputStream((B2File)zipFile, zipModel.isSplitArchive(),
+              zipModel.getEndOfCentralDirectoryRecord().getNumberOfThisDisk());
     }
 
     return new ZipStandardSplitFileInputStream(zipModel.getZipFile(), zipModel.isSplitArchive(),

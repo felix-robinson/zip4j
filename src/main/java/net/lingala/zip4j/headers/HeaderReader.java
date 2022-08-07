@@ -17,6 +17,7 @@
 package net.lingala.zip4j.headers;
 
 import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.io.inputstream.B2RemoteRandomAccessFile;
 import net.lingala.zip4j.io.inputstream.NumberedSplitRandomAccessFile;
 import net.lingala.zip4j.model.AESExtraDataRecord;
 import net.lingala.zip4j.model.AbstractFileHeader;
@@ -60,9 +61,9 @@ import static net.lingala.zip4j.util.Zip4jUtil.readFully;
  */
 public class HeaderReader {
 
-  private ZipModel zipModel;
-  private final RawIO rawIO = new RawIO();
-  private final byte[] intBuff = new byte[4];
+  protected ZipModel zipModel;
+  protected final RawIO rawIO = new RawIO();
+  protected final byte[] intBuff = new byte[4];
 
   public ZipModel readAllHeaders(RandomAccessFile zip4jRaf, Zip4jConfig zip4jConfig) throws IOException {
 
@@ -301,7 +302,7 @@ public class HeaderReader {
     }
   }
 
-  private List<ExtraDataRecord> parseExtraDataRecords(byte[] extraFieldBuf, int extraFieldLength) {
+  protected List<ExtraDataRecord> parseExtraDataRecords(byte[] extraFieldBuf, int extraFieldLength) {
     int counter = 0;
     List<ExtraDataRecord> extraDataRecords = new ArrayList<>();
     while (counter < extraFieldLength) {
@@ -397,7 +398,7 @@ public class HeaderReader {
     return zip64EndOfCentralDirectoryRecord;
   }
 
-  private void readZip64ExtendedInfo(FileHeader fileHeader, RawIO rawIO)  {
+  protected void readZip64ExtendedInfo(FileHeader fileHeader, RawIO rawIO)  {
     if (fileHeader.getExtraDataRecords() == null || fileHeader.getExtraDataRecords().size() <= 0) {
       return;
     }
@@ -456,7 +457,7 @@ public class HeaderReader {
     }
   }
 
-  private Zip64ExtendedInfo readZip64ExtendedInfo(List<ExtraDataRecord> extraDataRecords, RawIO rawIO,
+  protected Zip64ExtendedInfo readZip64ExtendedInfo(List<ExtraDataRecord> extraDataRecords, RawIO rawIO,
                                                   long uncompressedSize, long compressedSize, long offsetLocalHeader,
                                                   int diskNumberStart) {
 
@@ -613,7 +614,7 @@ public class HeaderReader {
     return dataDescriptor;
   }
 
-  private void readAesExtraDataRecord(AbstractFileHeader fileHeader, RawIO rawIO) throws ZipException {
+  protected void readAesExtraDataRecord(AbstractFileHeader fileHeader, RawIO rawIO) throws ZipException {
     if (fileHeader.getExtraDataRecords() == null || fileHeader.getExtraDataRecords().size() <= 0) {
       return;
     }
@@ -625,7 +626,7 @@ public class HeaderReader {
     }
   }
 
-  private AESExtraDataRecord readAesExtraDataRecord(List<ExtraDataRecord> extraDataRecords, RawIO rawIO)
+  protected AESExtraDataRecord readAesExtraDataRecord(List<ExtraDataRecord> extraDataRecords, RawIO rawIO)
       throws ZipException {
 
     if (extraDataRecords == null) {
@@ -665,7 +666,7 @@ public class HeaderReader {
     return null;
   }
 
-  private long getNumberOfEntriesInCentralDirectory(ZipModel zipModel) {
+  protected long getNumberOfEntriesInCentralDirectory(ZipModel zipModel) {
     if (zipModel.isZip64Format()) {
       return zipModel.getZip64EndOfCentralDirectoryRecord().getTotalNumberOfEntriesInCentralDirectory();
     }

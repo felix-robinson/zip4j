@@ -12,8 +12,8 @@ import java.io.RandomAccessFile;
  * A split input stream for zip file split as per zip specification. They end with .z01, .z02... .zip
  */
 public class ZipStandardSplitFileInputStream extends SplitFileInputStream {
-
   protected RandomAccessFile randomAccessFile;
+
   protected File zipFile;
   private int lastSplitZipFileNumber;
   private boolean isSplitZipArchive;

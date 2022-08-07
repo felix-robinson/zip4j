@@ -51,7 +51,7 @@ public abstract class AbstractExtractFileTask<T> extends AsyncZipTask<T> {
 
     assertCanonicalPathsAreSame(outputFile, outputPath, fileHeader);
 
-    verifyNextEntry(zipInputStream, fileHeader);
+//    verifyNextEntry(zipInputStream, fileHeader); // this gets data from the inputstream - moved to avoid it if the file already exists
 
     if (fileHeader.isDirectory()) {
       if (!outputFile.exists()) {
@@ -63,7 +63,10 @@ public abstract class AbstractExtractFileTask<T> extends AsyncZipTask<T> {
       createSymLink(zipInputStream, fileHeader, outputFile, progressMonitor);
     } else {
       checkOutputDirectoryStructure(outputFile);
-      unzipFile(zipInputStream, outputFile, progressMonitor, readBuff);
+      if (!outputFile.exists() && !(fileHeader.getUncompressedSize() == outputFile.length())) { // skip existing files that are the same size
+        verifyNextEntry(zipInputStream, fileHeader); // this gets data from the inputstream
+        unzipFile(zipInputStream, outputFile, progressMonitor, readBuff);
+      }
     }
 
     UnzipUtil.applyFileAttributes(fileHeader, outputFile);

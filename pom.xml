@@ -38,6 +38,7 @@
         <powermock.version>2.0.2</powermock.version>
         <failsafe.plugin.version>3.0.0-M3</failsafe.plugin.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <b2-sdk-httpclient.version>6.0.0</b2-sdk-httpclient.version>
     </properties>
 
     <distributionManagement>
@@ -81,6 +82,18 @@
             <artifactId>powermock-api-mockito2</artifactId>
             <version>${powermock.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.backblaze.b2</groupId>
+            <artifactId>b2-sdk-httpclient</artifactId>
+            <version>${b2-sdk-httpclient.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.javatuples</groupId>
+            <artifactId>javatuples</artifactId>
+            <version>1.2</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
@@ -126,8 +139,8 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <source>8</source>
+                    <target>8</target>
                 </configuration>
             </plugin>
             <plugin>

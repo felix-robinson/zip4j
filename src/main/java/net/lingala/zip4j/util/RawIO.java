@@ -17,6 +17,7 @@
 package net.lingala.zip4j.util;
 
 import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.io.inputstream.B2RemoteRandomAccessFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +36,18 @@ public class RawIO {
     return readLongLittleEndian(longBuff, 0);
   }
 
+  public long readLongLittleEndian(B2RemoteRandomAccessFile randomAccessFile) throws IOException {
+    randomAccessFile.readFully(longBuff);
+    return readLongLittleEndian(longBuff, 0);
+  }
+
   public long readLongLittleEndian(RandomAccessFile randomAccessFile, int readLen) throws IOException {
+    resetBytes(longBuff);
+    randomAccessFile.readFully(longBuff, 0, readLen);
+    return readLongLittleEndian(longBuff, 0);
+  }
+
+  public long readLongLittleEndian(B2RemoteRandomAccessFile randomAccessFile, int readLen) throws IOException {
     resetBytes(longBuff);
     randomAccessFile.readFully(longBuff, 0, readLen);
     return readLongLittleEndian(longBuff, 0);
@@ -82,6 +94,11 @@ public class RawIO {
     return readIntLittleEndian(intBuff);
   }
 
+  public int readIntLittleEndian(B2RemoteRandomAccessFile randomAccessFile) throws IOException {
+    randomAccessFile.readFully(intBuff);
+    return readIntLittleEndian(intBuff);
+  }
+
   public int readIntLittleEndian(InputStream inputStream) throws IOException {
     readFully(inputStream, intBuff, 4);
     return readIntLittleEndian(intBuff);
@@ -97,6 +114,11 @@ public class RawIO {
   }
 
   public int readShortLittleEndian(RandomAccessFile randomAccessFile) throws IOException {
+    randomAccessFile.readFully(shortBuff);
+    return readShortLittleEndian(shortBuff, 0);
+  }
+
+  public int readShortLittleEndian(B2RemoteRandomAccessFile randomAccessFile) throws IOException {
     randomAccessFile.readFully(shortBuff);
     return readShortLittleEndian(shortBuff, 0);
   }

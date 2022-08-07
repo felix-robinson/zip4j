@@ -17,9 +17,12 @@
 package net.lingala.zip4j;
 
 import net.lingala.zip4j.exception.ZipException;
+import net.lingala.zip4j.headers.B2HeaderReader;
 import net.lingala.zip4j.headers.HeaderReader;
 import net.lingala.zip4j.headers.HeaderUtil;
 import net.lingala.zip4j.headers.HeaderWriter;
+import net.lingala.zip4j.io.inputstream.B2File;
+import net.lingala.zip4j.io.inputstream.B2RemoteRandomAccessFile;
 import net.lingala.zip4j.io.inputstream.NumberedSplitRandomAccessFile;
 import net.lingala.zip4j.io.inputstream.ZipInputStream;
 import net.lingala.zip4j.model.FileHeader;
@@ -1130,14 +1133,27 @@ public class ZipFile implements Closeable {
       throw new ZipException("no read access for the input zip file");
     }
 
-    try (RandomAccessFile randomAccessFile = initializeRandomAccessFileForHeaderReading()) {
-      HeaderReader headerReader = new HeaderReader();
-      zipModel = headerReader.readAllHeaders(randomAccessFile, buildConfig());
-      zipModel.setZipFile(zipFile);
-    } catch (ZipException e) {
-      throw e;
-    } catch (IOException e) {
-      throw new ZipException(e);
+    if (zipFile instanceof B2File) {
+      try {
+        B2RemoteRandomAccessFile randomAccessFile = new B2RemoteRandomAccessFile((B2File) zipFile);
+        B2HeaderReader headerReader = new B2HeaderReader();
+        zipModel = headerReader.readAllHeaders(randomAccessFile, buildConfig());
+        zipModel.setZipFile(zipFile);
+      } catch (ZipException ze) {
+        throw ze;
+      } catch (Exception e) {
+        throw new ZipException(e);
+      }
+    } else {
+      try (RandomAccessFile randomAccessFile = initializeRandomAccessFileForHeaderReading()) {
+        HeaderReader headerReader = new HeaderReader();
+        zipModel = headerReader.readAllHeaders(randomAccessFile, buildConfig());
+        zipModel.setZipFile(zipFile);
+      } catch (ZipException e) {
+        throw e;
+      } catch (IOException e) {
+        throw new ZipException(e);
+      }
     }
   }
 

@@ -47,7 +47,7 @@ public class ZipInputStream extends InputStream {
 
   private PushbackInputStream inputStream;
   private DecompressedInputStream decompressedInputStream;
-  private HeaderReader headerReader = new HeaderReader();
+  private HeaderReader headerReader = new HeaderReader(); // TODO find a way to turn this into a B2HeaderReader
   private char[] password;
   private PasswordCallback passwordCallback;
   private LocalFileHeader localFileHeader;
